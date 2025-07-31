@@ -74,11 +74,14 @@
           total (atom 0)]
       (doseq [batch hits-batches]
         (let [transformed (doall (keep transform-hit batch))]
-          (if (seq transformed)
-            (do
-              (ch/insert-batch transformed)
-              (println "📥 Inserted:" (count transformed) "records"))
-            (println "🟡 Empty batch after transformation"))
-          (swap! total + (count transformed))))
+           (println "🔢 Transformed count:" (count transformed) "/" (count batch))
+           (when (seq transformed)
+               (println "🧪 Sample record:" (pr-str (first transformed))))
+           (if (seq transformed)
+              (do
+                (ch/insert-batch transformed)
+                (println "📥 Inserted:" (count transformed) "records"))
+             (println "🟡 Empty batch after transformation"))
+           (swap! total + (count transformed))))
       (println "✅ Sync completed. Total inserted:" @total)
       @total)))
