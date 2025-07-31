@@ -12,7 +12,7 @@
                   :sort [{"@timestamp" {"order" "asc"}} {"_id" {"order" "asc"}}]}]
       (try
         (loop [search-after nil results []]
-          (println "DEBUG: Sending ES request with from:" from " search_after:" search-after)  ; Отладка запроса
+          (println "DEBUG: Sending ES request with search_after:" search-after)
           (let [q (if search-after (assoc query-base :search_after search-after) query-base)
                 url (str (:es-host config) "/" (:index-pattern config) "/_search")
                 resp (http/post url {:body (json/generate-string q)
