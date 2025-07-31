@@ -67,18 +67,10 @@
   (m/timed "sync_incremental"
     (let [last-ts (ch/get-last-timestamp)
           _ (println "DEBUG: last-ts value:" last-ts " type:" (type last-ts))
-          joda-last-ts (->joda-time last-ts)
-          effective-last-ts (if (or (nil? joda-last-ts)
-                                   (time/before? joda-last-ts epoch-threshold))
-                              nil
-                              joda-last-ts)
-          from-str (if effective-last-ts
-                     (f/unparse iso-formatter joda-last-ts)
-                     "now-12m")
-          _ (println "🔁 Sync from:" from-str)
-          hits-batches (fetch-incremental fetcher from-str)
+          hits-batches (fetch-incremental fetcher last-ts)
           _ (println "🎯 Realizing first batch...")
-          _ (when (seq hits-batches) (println "🎯 First batch size:" (count (first hits-batches))))
+          _ (when (seq hits-batches)
+              (println "🎯 First batch size:" (count (first hits-batches))))
           total (atom 0)]
       (doseq [batch hits-batches]
         (let [transformed (doall (keep transform-hit batch))]

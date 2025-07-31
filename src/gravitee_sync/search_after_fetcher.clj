@@ -7,10 +7,9 @@
 (defrecord SearchAfterFetcher []
   DataFetcher
   (fetch-incremental [_ last-marker]
-    (let [from (or last-marker "now-12m")
-          query-base {:query {:range {"@timestamp" {:gte from :lt "now"}}}
-                      :size (:batch-size config)
-                      :sort [{"@timestamp" {"order" "asc"}} {"_id" {"order" "asc"}}]}]
+    (let [query-base {:query {:match_all {}}
+                  :size (:batch-size config)
+                  :sort [{"@timestamp" {"order" "asc"}} {"_id" {"order" "asc"}}]}]
       (try
         (loop [search-after nil results []]
           (println "DEBUG: Sending ES request with from:" from " search_after:" search-after)  ; Отладка запроса
