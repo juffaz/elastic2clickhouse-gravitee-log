@@ -24,7 +24,12 @@
     (let [instant (.toInstant (.atZone ^LocalDateTime x (ZoneId/of "UTC")))]
       (tc/from-long (.toEpochMilli instant)))
     (string? x)
-    (try (f/parse iso-formatter x) (catch Exception _ nil))
+    (try
+       (let [zoned (java.time.ZonedDateTime/parse x)]
+         (tc/from-long (.toEpochMilli (.toInstant zoned))))
+       (catch Exception e
+         (println "❌ Timestamp parse failed:" x "error:" (.getMessage e))
+         nil))
     (number? x)
     (tc/from-long x)
     :else
