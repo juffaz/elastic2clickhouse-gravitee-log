@@ -1,0 +1,85 @@
+# Technical Description of the gravitee-sync Project
+
+## Project Overview
+gravitee-sync is a Clojure application for synchronizing Gravitee logs from Elasticsearch to ClickHouse. The project is designed for efficient transfer of API gateway Gravitee log data from the Elasticsearch search engine to the ClickHouse analytical database for further analysis and monitoring.
+
+## Architecture and Code Structure
+
+### Main Components
+- **core.clj**: Main entry point, implements the main synchronization loop with periodic runs
+- **config.clj**: Configuration management via environment variables
+- **fetcher.clj**: Protocol for data fetching abstraction
+- **search_after_fetcher.clj**: Fetcher implementation using Elasticsearch search_after API
+- **sync.clj**: Synchronization logic, data transformation, and timestamp processing
+- **clickhouse.clj**: ClickHouse integration for data insertion
+- **metrics.clj**: Simple metrics and performance logging system
+
+### Technologies
+- **Language**: Clojure 1.11.1
+- **HTTP Client**: clj-http 3.12.3
+- **JSON Processing**: Cheshire 5.11.0
+- **Time Handling**: clj-time 0.15.2
+- **Database**: ClickHouse JDBC 0.4.6, LZ4 compression
+- **JDBC**: clojure.java.jdbc 0.7.12
+
+## Functionality
+
+### Key Features
+1. **Incremental Synchronization**: Automatic detection of the last processed timestamp to resume synchronization from where it left off
+2. **Batch Processing**: Group data insertion into ClickHouse for performance optimization
+3. **Support for Various Timestamp Formats**: ISO8601, Java-style, Unix timestamp
+4. **Data Compression**: LZ4 compression for efficient data transfer
+5. **Resilience**: Error handling and detailed logging
+6. **Configurability**: Setup via environment variables
+
+### Synchronization Process
+1. Retrieve the last timestamp from ClickHouse
+2. Query data from Elasticsearch using search_after for pagination
+3. Transform data (timestamp parsing, field mapping)
+4. Batch insert into ClickHouse
+5. Repeat the cycle at the specified interval
+
+## Pros
+
+### Technical Advantages
+- **Functional Style**: Clojure provides immutable data structures and functional approach
+- **JVM Ecosystem**: Access to rich Java library ecosystem
+- **Easy Deployment**: Docker containerization, uberjar build
+- **Efficiency**: Batch processing and data compression
+- **Flexibility**: Support for various data formats and configurations
+
+### Architectural Pros
+- **Modularity**: Clear separation of responsibilities between components
+- **Extensibility**: DataFetcher protocol allows easy addition of new data sources
+- **Resilience**: Graceful error handling and logging
+- **Performance**: Incremental synchronization and batch inserts
+
+## Cons
+
+### Technical Issues
+- **Lack of Typing**: Clojure's dynamic typing can lead to runtime errors
+- **Memory Usage**: Clojure may be less memory-efficient compared to Java
+- **Debugging**: Difficulty debugging functional code with lazy sequences
+
+### Architectural Disadvantages
+- **Synchronous Processing**: Main loop runs sequentially, no parallel processing
+- **Limited Logging**: Simple metrics system without integration with external monitoring systems
+- **Tight Coupling**: Strong integration with specific technologies (ES + CH)
+- **Lack of Testing**: No visible unit/integration tests
+
+### Code Quality Issues
+- **Debug Code**: Many println statements for debugging in production code
+- **Error Handling**: Basic exception handling without detailed error type analysis
+- **Configuration**: Incomplete ClickHouse URL configuration in config.clj (missing ch-host, ch-port, ch-db)
+- **Performance**: Potential memory issues with large data volumes due to eager evaluation in some places
+
+## Recommendations for Improvement
+
+1. **Add Testing**: Unit and integration tests
+2. **Improve Error Handling**: More detailed error classification and handling
+3. **Optimize Performance**: Implement asynchronous processing and streaming
+4. **Enhance Monitoring**: Integration with Prometheus/Grafana
+5. **Refactor Configuration**: Fix ClickHouse configuration
+6. **Remove Debug Code**: Replace println with structured logging
+7. **Add Typing**: Consider using spec or schema for data validation
+8. **Documentation**: Add API documentation and usage examples
