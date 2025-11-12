@@ -124,3 +124,7 @@ config/
 *.json.bak
 *.yml.bak
 *.yaml.bak
+
+# IDE and tooling caches
+.clj-kondo/
+.lsp/
